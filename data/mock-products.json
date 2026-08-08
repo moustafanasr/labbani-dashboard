@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "name": "مندي دجاج",
+    "sku": "MN-001",
+    "category": "الدجاج",
+    "price": 42,
+    "branches": 5,
+    "status": "active",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "2",
+    "name": "مندي لحم",
+    "sku": "MN-002",
+    "category": "اللحوم",
+    "price": 58,
+    "branches": 5,
+    "status": "active",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "3",
+    "name": "نصف دجاج شواية",
+    "sku": "GC-003",
+    "category": "الدجاج",
+    "price": 29,
+    "branches": 5,
+    "status": "active",
+    "lastUpdated": "31 يوليو 2026"
+  },
+  {
+    "id": "4",
+    "name": "كبسة دجاج",
+    "sku": "KB-004",
+    "category": "الدجاج",
+    "price": 38,
+    "branches": 5,
+    "status": "active",
+    "lastUpdated": "31 يوليو 2026"
+  }
+]

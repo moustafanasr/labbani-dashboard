@@ -1,0 +1,24 @@
+{
+  "login": {
+    "title": "مرحباً بعودتك",
+    "subtitle": "سجّل الدخول لإدارة عمليات المطعم والفروع",
+    "email": "اسم المستخدم أو البريد الإلكتروني",
+    "emailPlaceholder": "أدخل اسم المستخدم",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "remember": "تذكّرني",
+    "forgot": "نسيت كلمة المرور؟",
+    "submit": "تسجيل الدخول",
+    "loading": "جاري التسجيل...",
+    "demo": "بيانات تجريبية:",
+    "demoCredentials": "admin@labbani.sa / password",
+    "error": "بيانات الدخول غير صحيحة",
+    "success": "مرحباً بعودتك إلى لبانى",
+    "genericError": "حدث خطأ، يرجى المحاولة مرة أخرى",
+    "switchLanguage": "English",
+    "welcomeBack": "مرحباً بعودتك",
+    "manageOperations": "سجّل الدخول لإدارة عمليات المطعم والفروع",
+    "or": "أو",
+    "loginWith": "تسجيل الدخول باستخدام"
+  }
+}

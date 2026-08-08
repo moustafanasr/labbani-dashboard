@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "name": "فرع الرياض — طريق الملك عبدالله",
+    "city": "الرياض",
+    "manager": "أحمد محمد العتيبي",
+    "productCount": 428,
+    "sales": 48920,
+    "status": "open",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "2",
+    "name": "فرع جدة — شارع التحلية",
+    "city": "جدة",
+    "manager": "سارة عبدالله القحطاني",
+    "productCount": 392,
+    "sales": 38640,
+    "status": "open",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "3",
+    "name": "فرع الدمام — طريق الخليج",
+    "city": "الدمام",
+    "manager": "خالد محمد الحربي",
+    "productCount": 348,
+    "sales": 24180,
+    "status": "open",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "4",
+    "name": "فرع الخبر — طريق الملك فيصل",
+    "city": "الخبر",
+    "manager": "نورة سعد المطيري",
+    "productCount": 312,
+    "sales": 19840,
+    "status": "open",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "5",
+    "name": "فرع مكة — العزيزية",
+    "city": "مكة المكرمة",
+    "manager": "محمد سعد الغامدي",
+    "productCount": 284,
+    "sales": 15420,
+    "status": "open",
+    "lastUpdated": "01 أغسطس 2026"
+  },
+  {
+    "id": "6",
+    "name": "فرع المدينة — طريق الهجرة",
+    "city": "المدينة المنورة",
+    "manager": "ريم فهد الشهري",
+    "productCount": 0,
+    "sales": 0,
+    "status": "closed",
+    "lastUpdated": "01 أغسطس 2026"
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "login": {
+    "title": "Welcome Back",
+    "subtitle": "Sign in to manage restaurant operations and branches",
+    "email": "Username or Email",
+    "emailPlaceholder": "Enter username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter password",
+    "remember": "Remember me",
+    "forgot": "Forgot password?",
+    "submit": "Sign In",
+    "loading": "Signing in...",
+    "demo": "Demo credentials:",
+    "demoCredentials": "admin@labbani.sa / password",
+    "error": "Invalid credentials",
+    "success": "Welcome back to Labbani",
+    "genericError": "Something went wrong. Please try again.",
+    "switchLanguage": "العربية",
+    "welcomeBack": "Welcome Back",
+    "manageOperations": "Sign in to manage restaurant operations and branches",
+    "or": "Or",
+    "loginWith": "Login with"
+  }
+}
