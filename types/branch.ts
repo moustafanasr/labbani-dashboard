@@ -1,17 +1,18 @@
+export type BranchStatus = 'open' | 'closed';
+
 export interface Branch {
   id: string;
   name: string;
+  code: string;
+  phone: string;
+  email: string;
+  address: string;
   city: string;
-  manager: string;
-  productCount: number;
-  sales: number;
-  status: 'open' | 'closed';
-  lastUpdated: string;
+  latitude: number;
+  longitude: number;
+  status: BranchStatus; // تم التعديل هنا ليكون 'open' أو 'closed'
+  createdAt: string;
 }
 
-export interface BranchInventory {
-  branchName: string;
-  available: number;
-  minThreshold: number;
-  status: 'available' | 'low_stock';
-}
+// هذا النوع هو المفقود وكان يسبب الخطأ
+export type BranchInput = Omit<Branch, 'id' | 'createdAt'>;
