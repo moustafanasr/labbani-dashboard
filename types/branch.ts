@@ -1,18 +1,24 @@
+// types/branch.ts
 export type BranchStatus = 'open' | 'closed';
 
 export interface Branch {
   id: string;
   name: string;
-  code: string;
-  phone: string;
-  email: string;
-  address: string;
+  code: string;           // من الملف الجديد
+  phone: string;          // من الملف الجديد
+  email: string;          // من الملف الجديد
+  address: string;        // من الملف الجديد
   city: string;
-  latitude: number;
-  longitude: number;
-  status: BranchStatus; // تم التعديل هنا ليكون 'open' أو 'closed'
-  createdAt: string;
+  latitude: number;       // من الملف الجديد
+  longitude: number;      // من الملف الجديد
+  status: BranchStatus;
+  createdAt: string;      // من الملف الجديد
+
+  // حقول الجدول القديمة (نحتاجها للواجهة)
+  manager: string;
+  productCount: number;
+  sales: number;
+  lastUpdated: string;
 }
 
-// هذا النوع هو المفقود وكان يسبب الخطأ
-export type BranchInput = Omit<Branch, 'id' | 'createdAt'>;
+export type BranchInput = Omit<Branch, 'id' | 'createdAt' | 'lastUpdated' | 'productCount' | 'sales'>;
