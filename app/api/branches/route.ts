@@ -1,9 +1,20 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/mock-db";
-import { branchSchema } from "@/lib/branch-schema";
-export async function GET(){ return NextResponse.json(db.all()); }
-export async function POST(req:Request){
-  const parsed=branchSchema.safeParse(await req.json());
-  if(!parsed.success) return NextResponse.json({message:"Invalid branch data",issues:parsed.error.issues},{status:400});
-  return NextResponse.json(db.create(parsed.data),{status:201});
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/mock-db';
+import { BranchInput } from '@/types/branch';
+
+export async function GET() {
+  return NextResponse.json(db.all());
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  
+  // تحويل 'active' إلى 'open' لو جت من الـ UI
+  const payload: BranchInput = {
+    ...body,
+    status: body.status === 'active' ? 'open' : 'closed'
+  };
+
+  const branch = db.create(payload);
+  return NextResponse.json(branch);
 }

@@ -31,15 +31,23 @@ const BranchesTable = () => {
       );
       mutate(updatedBranches, false);
     } else {
-      const newBranch: Branch = {
+            const newBranch: Branch = {
         id: Date.now().toString(),
         name: formData.name,
         city: formData.city,
-        manager: formData.manager,
+        manager: formData.manager || 'مدير افتراضي', // لو مفيش مدير، نحط قيمة افتراضية
         status: formData.status,
         productCount: 0,
         sales: 0,
-        lastUpdated: new Date().toLocaleDateString('ar-EG')
+        lastUpdated: new Date().toLocaleDateString('ar-EG'),
+        // لازم نضيف باقي الحقول عشان الـ Type يرضى
+        code: 'NEW',
+        phone: 'N/A',
+        email: 'N/A',
+        address: 'N/A',
+        latitude: 0,
+        longitude: 0,
+        createdAt: new Date().toISOString()
       };
       mutate([...branches, newBranch], false);
     }
