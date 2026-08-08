@@ -9,9 +9,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const body = await request.json();
   
-  // تحويل 'active' إلى 'open' لو جت من الـ UI
+  // أهم تعديل: نضيف manager بقيمة افتراضية لو مش موجود
   const payload: BranchInput = {
     ...body,
+    manager: body.manager || 'مدير افتراضي',
     status: body.status === 'active' ? 'open' : 'closed'
   };
 

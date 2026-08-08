@@ -4,17 +4,18 @@ import { BranchInput } from '@/types/branch';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  // هنا نغير النوع عشان نرضي Next.js 15+
+  context: { params: any }
 ) {
   const body = await request.json();
+  const { id } = context.params;
   
-  // تحويل 'active' إلى 'open' لو جت من الـ UI
   const payload: Partial<BranchInput> = {
     ...body,
     status: body.status === 'active' ? 'open' : 'closed'
   };
 
-  const branch = db.update(params.id, payload);
+  const branch = db.update(id, payload);
   if (!branch) {
     return NextResponse.json({ error: 'Branch not found' }, { status: 404 });
   }
@@ -23,9 +24,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  // هنا كمان نغير النوع
+  context: { params: any }
 ) {
-  const deleted = db.remove(params.id);
+  const { id } = context.params;
+  const deleted = db.remove(id);
   if (!deleted) {
     return NextResponse.json({ error: 'Branch not found' }, { status: 404 });
   }

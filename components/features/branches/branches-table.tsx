@@ -73,7 +73,7 @@ const BranchesTable = () => {
             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-[#666666]">{branch.city}</td>
             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-[#666666]">{branch.manager}</td>
             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-[#1C1C1C]">{branch.productCount}</td>
-            <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-[#1C1C1C]">{formatCurrency(branch.sales)}</td>
+            <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-[#1C1C1C]">{formatCurrency(branch.sales || 0)}</td>
             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
               <StatusBadge status={branch.status} label={branch.status === 'open' ? 'مفتوح' : 'مغلق'} />
             </td>

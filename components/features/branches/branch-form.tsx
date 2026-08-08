@@ -60,7 +60,7 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
       <div>
         <label className="block text-sm font-medium text-[#1C1C1C] mb-1">اسم المدير</label>
         <Input 
-          value={formData.manager}
+          value={formData.manager || ''}
           onChange={(e) => setFormData({ ...formData, manager: e.target.value })}
           placeholder="مثال: أحمد العتيبي" 
           required
