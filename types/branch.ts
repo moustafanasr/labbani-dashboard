@@ -15,7 +15,7 @@ export interface Branch {
   createdAt: string;
 
   // حقول واجهة المستخدم (جعلناها optional عشان الـ API يقدر يشتغل من غيرها)
-  manager?: string;
+  manager: string;
   productCount?: number;
   sales?: number;
   lastUpdated?: string;
