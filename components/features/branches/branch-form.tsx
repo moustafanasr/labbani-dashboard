@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { branchSchema, BranchFormValues } from '@/lib/branch-schema';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
-import { Branch } from '@/types/branch';
+import { Branch, FulfillmentMethod } from '@/types/branch';
 
 interface BranchFormProps {
   initialData?: Branch | null;
@@ -31,25 +31,19 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
       openingTime: initialData?.openingTime || '09:00',
       closingTime: initialData?.closingTime || '23:00',
       address: {
-        latitude: initialData?.address?.latitude || 24.7135,
-        longitude: initialData?.address?.longitude || 46.6753,
+        latitude: initialData?.address?.latitude || 0,
+        longitude: initialData?.address?.longitude || 0,
         country: initialData?.address?.country || 'Saudi Arabia',
         city: initialData?.address?.city || initialData?.city || 'Riyadh',
-        street: initialData?.address?.street || 'Olaya Street',
-        buildingNumber: initialData?.address?.buildingNumber || '1',
-        district: initialData?.address?.district || 'Al Olaya',
-        landmark: initialData?.address?.landmark || 'Near Centre',
-        notes: initialData?.address?.notes || '',
+        street: initialData?.address?.street || '',
+        buildingNumber: initialData?.address?.buildingNumber || '',
       },
-      fulfillmentMethods: Array.isArray(initialData?.fulfillmentMethods)
-        ? initialData.fulfillmentMethods
-        : ['PICKUP'],
+      fulfillmentMethods: (initialData?.fulfillmentMethods as FulfillmentMethod[]) || ['PICKUP'],
     },
   });
 
   const isActive = watch('isActive');
 
-  // تحويل البيانات عند الحفظ لتطابق تنسيق الـ API
   const onSubmit = (data: BranchFormValues) => {
     const payload = {
       name: data.name,
@@ -65,13 +59,8 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
         city: data.address.city || data.city,
         street: data.address.street || '',
         buildingNumber: data.address.buildingNumber || '',
-        district: data.address.district || '',
-        landmark: data.address.landmark || '',
-        notes: data.address.notes || '',
       },
-      fulfillmentMethods: data.fulfillmentMethods.length
-        ? data.fulfillmentMethods
-        : ['PICKUP'],
+      fulfillmentMethods: data.fulfillmentMethods,
     };
     onSave(payload);
   };
@@ -138,16 +127,12 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-[#1C1C1C] mb-1">خط العرض (Latitude)</label>
-            <Input type="number" step="any" {...register('address.latitude', { valueAsNumber: true })} placeholder="24.7135" />
+            <Input type="number" step="any" {...register('address.latitude', { valueAsNumber: true })} />
           </div>
           <div>
             <label className="block text-sm font-medium text-[#1C1C1C] mb-1">خط الطول (Longitude)</label>
-            <Input type="number" step="any" {...register('address.longitude', { valueAsNumber: true })} placeholder="46.6753" />
+            <Input type="number" step="any" {...register('address.longitude', { valueAsNumber: true })} />
           </div>
-        </div>
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-[#1C1C1C] mb-1">الشارع / المنطقة</label>
-          <Input {...register('address.street')} placeholder="اسم الشارع" />
         </div>
       </div>
 
