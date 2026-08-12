@@ -3,14 +3,21 @@ export interface Address {
   id?: number;
   latitude: number;
   longitude: number;
+  country?: string;
+  region?: string;
+  governorate?: string;
   city?: string;
+  district?: string;
   street?: string;
   buildingNumber?: string;
-  district?: string;
+  floor?: string;
+  apartment?: string;
   landmark?: string;
   notes?: string;
   addressType?: string;
 }
+
+export type FulfillmentMethod = 'DRIVE_THRU' | 'DELIVERY' | 'PICKUP' | 'DINE_IN';
 
 export interface Branch {
   id: string;
@@ -27,7 +34,7 @@ export interface Branch {
   lastUpdated?: string;
   createdAt?: string;
   address?: Address;
-  fulfillmentMethods?: string[];
+  fulfillmentMethods?: FulfillmentMethod[];
   code?: string;
   phone?: string;
   email?: string;
