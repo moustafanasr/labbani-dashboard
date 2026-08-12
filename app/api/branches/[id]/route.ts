@@ -4,9 +4,10 @@ import { BranchInput } from '@/types/branch';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ تم التعديل هنا
 ) {
   try {
+    const { id } = await context.params; // ✅ فك الـ Promise
     const body = await request.json();
     
     // تحويل البيانات لإرضاء الـ TypeScript
@@ -38,7 +39,7 @@ export async function PUT(
         : [],
     };
 
-    const branch = db.update(params.id, payload);
+    const branch = db.update(id, payload);
     if (!branch) {
       return NextResponse.json({ error: 'Branch not found' }, { status: 404 });
     }
@@ -50,9 +51,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ تم التعديل هنا
 ) {
-  const deleted = db.remove(params.id);
+  const { id } = await context.params; // ✅ فك الـ Promise
+  const deleted = db.remove(id);
   if (!deleted) {
     return NextResponse.json({ error: 'Branch not found' }, { status: 404 });
   }
