@@ -4,7 +4,8 @@ export const branchSchema = z.object({
   name: z.string().min(1, 'اسم الفرع مطلوب'),
   nameAr: z.string().optional(),
   city: z.string().min(1, 'المدينة مطلوبة'),
-  isActive: z.boolean().default(true),
+  // ✅ جعلنا isActive إلزامي
+  isActive: z.boolean(),
   openingTime: z.string().min(1, 'وقت الفتح مطلوب'),
   closingTime: z.string().min(1, 'وقت الإغلاق مطلوب'),
   address: z.object({
