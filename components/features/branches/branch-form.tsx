@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { branchSchema, BranchFormValues } from '@/lib/branch-schema';
@@ -38,6 +38,7 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
         street: initialData?.address?.street || '',
         buildingNumber: initialData?.address?.buildingNumber || '',
       },
+      // ✅ استخدام as const والتأكد من النوع
       fulfillmentMethods: (initialData?.fulfillmentMethods as FulfillmentMethod[]) || ['PICKUP'],
     },
   });
@@ -45,7 +46,6 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
   const isActive = watch('isActive');
 
   const onSubmit = (data: BranchFormValues) => {
-    // تحويل fulfillmentMethods من مصفوفة نصوص إلى مصفوفة أجسام قبل الإرسال
     const payload = {
       name: data.name,
       nameAr: data.nameAr,
@@ -61,7 +61,8 @@ const BranchForm = ({ initialData, onSave, onCancel }: BranchFormProps) => {
         street: data.address.street || '',
         buildingNumber: data.address.buildingNumber || '',
       },
-      fulfillmentMethods: data.fulfillmentMethods.map((method) => ({ fulfillmentMethod: method })),
+      // ✅ إرسال كـ مصفوفة نصوص
+      fulfillmentMethods: data.fulfillmentMethods,
     };
     onSave(payload);
   };
