@@ -1,28 +1,39 @@
-// app/[locale]/layout.tsx
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Cairo } from "next/font/google";
+
+const cairo = Cairo({ 
+  subsets: ["arabic", "latin"],
+  variable: '--font-cairo',
+});
+
+export const metadata: Metadata = {
+  title: "مطعم لبني - لوحة التحكم",
+  description: "نظام إدارة المطعم والفروع",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: "no",
+};
+
+interface LocaleLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}
 
 export default async function LocaleLayout({
   children,
   params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  
-  const validLocales = ["ar", "en"];
-  if (!validLocales.includes(locale)) {
-    redirect("/ar");
-  }
-
-  // ✅ استخدم getMessages للحصول على الرسائل
-  const messages = await getMessages();
+}: LocaleLayoutProps) {
+  const { locale } = await params; 
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <body className={`${cairo.variable} bg-[#FAFAFA] antialiased`}>
+        {children}
+      </body>
+    </html>
   );
 }

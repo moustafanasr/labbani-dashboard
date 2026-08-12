@@ -1,25 +1,38 @@
 // types/branch.ts
-export type BranchStatus = 'open' | 'closed';
+export interface Address {
+  id?: number;
+  latitude: number;
+  longitude: number;
+  city?: string;
+  street?: string;
+  buildingNumber?: string;
+  district?: string;
+  landmark?: string;
+  notes?: string;
+  addressType?: string;
+}
 
 export interface Branch {
   id: string;
   name: string;
-  code: string;
-  phone: string;
-  email: string;
-  address: string;
+  nameAr?: string;
   city: string;
-  latitude: number;
-  longitude: number;
-  status: BranchStatus;
-  createdAt: string;
-
-  // حقول واجهة المستخدم (جعلناها optional عشان الـ API يقدر يشتغل من غيرها)
-  manager: string;
+  manager?: string;
   productCount?: number;
   sales?: number;
+  isActive: boolean;
+  openingTime?: string;
+  closingTime?: string;
+  phoneNumber?: string;
   lastUpdated?: string;
+  createdAt?: string;
+  address?: Address;
+  fulfillmentMethods?: string[];
+  code?: string;
+  phone?: string;
+  email?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
-// هذا النوع مخصص للإدخال (API)
 export type BranchInput = Omit<Branch, 'id' | 'createdAt' | 'productCount' | 'sales' | 'lastUpdated'>;

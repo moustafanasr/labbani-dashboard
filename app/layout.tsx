@@ -1,24 +1,23 @@
-// app/layout.tsx
 import type { Metadata } from "next";
-import { Cairo, Inter } from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const cairo = Cairo({
+const cairo = Cairo({ 
   subsets: ["arabic", "latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-cairo",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
+  variable: '--font-cairo', // تأكد من تعريف المتغير هنا
 });
 
 export const metadata: Metadata = {
-  title: "Labbani | Login",
-  description: "Labbani restaurant branch management system",
+  title: "مطعم لبني - لوحة التحكم",
+  description: "نظام إدارة المطعم والفروع",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1.0,
+  maximumScale: 1.0,
+  userScalable: "no",
 };
 
 export default function RootLayout({
@@ -27,13 +26,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html>
-      <body 
-        className={`${cairo.variable} ${inter.variable} font-body antialiased`}
-        suppressHydrationWarning // ✅ أضف هذا السطر
-      >
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+    // لا نضع <html> أو <body> هنا، فقط نعيد الأطفال مع إضافة الكلاس
+    // ملاحظة: لو بتستخدم Next.js 15، ممكن تحتاج تلف الأطفال بـ Providers
+    <Providers>
+      {children}
+    </Providers>
   );
 }
