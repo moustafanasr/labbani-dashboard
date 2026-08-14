@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// ✅ الرابط المباشر للـ Backend
 const BASE_URL = 'https://dev-labani-backend.oxa4rl.easypanel.host/api/v1';
 
 const api = axios.create({
@@ -10,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// إضافة الـ Token للطلب
+// ✅ إضافة الـ Token للطلب
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('labbani_auth_token');
@@ -21,7 +22,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// معالجة الـ 401 (انتهاء صلاحية التوكن) - إعادة توجيه لصفحة تسجيل الدخول
+// ✅ معالجة الـ 401 (انتهاء صلاحية التوكن) - تحديث تلقائي
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -29,13 +30,34 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
-      // محاولة تحديث التوكن (لو كان في السيرفر endpoint للـ refresh)
-      // في حالتنا الحالية، سنقوم بمسح التوكن وإعادة التوجيه للـ login
-      localStorage.removeItem('labbani_auth_token');
-      
-      // منع التوجيه اللانهائي
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+      try {
+        // ✅ 1. جلب refreshToken من التخزين
+        const refreshToken = localStorage.getItem('labbani_refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // ✅ 2. إرسال طلب refresh إلى السيرفر
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+
+        // ✅ 3. تحديث التخزين بالتوكن الجديد
+        if (data.accessToken) {
+          localStorage.setItem('labbani_auth_token', data.accessToken);
+          if (data.refreshToken) {
+            localStorage.setItem('labbani_refresh_token', data.refreshToken);
+          }
+          // ✅ 4. تحديث الـ Authorization وإعادة الطلب الأصلي
+          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // ✅ لو فشل التحديث، نسحب التوكن ونوجه للـ login
+        localStorage.removeItem('labbani_auth_token');
+        localStorage.removeItem('labbani_refresh_token');
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
       }
     }
     return Promise.reject(error);

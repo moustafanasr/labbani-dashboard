@@ -9,8 +9,8 @@ import Input from '@/components/ui/input';
 export default function LoginPage() {
   const router = useRouter();
   // بيانات افتراضية لتسهيل الاختبار
-  const [email, setEmail] = useState('super-admin@labbani.local');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('super-admin@labani.local');
+  const [password, setPassword] = useState('JlMvCBN54xA4L0r');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,8 +24,12 @@ export default function LoginPage() {
       const response = await api.post('/auth/login', { email, password });
       
       // تخزين الـ Token (السيرفر قد يرجع باسم access_token أو token)
-            if (response.data && response.data.accessToken) {
+      if (response.data && response.data.accessToken) {
         localStorage.setItem('labbani_auth_token', response.data.accessToken);
+        // ✅ تخزين refreshToken إذا وُجد
+        if (response.data.refreshToken) {
+          localStorage.setItem('labbani_refresh_token', response.data.refreshToken);
+        }
         router.push('/dashboard/branches');
       } else {
         setError('لم يتم استلام التوكن من السيرفر');

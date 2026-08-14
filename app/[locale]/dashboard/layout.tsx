@@ -14,5 +14,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [router]);
 
+  // ✅ الصفحة كلها ستغلف بـ AdminLayout هنا فقط
   return <AdminLayout>{children}</AdminLayout>;
 }

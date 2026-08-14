@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   ColumnDef,
   flexRender,
 } from '@tanstack/react-table';
@@ -22,25 +24,28 @@ import { Eye, Pencil, Trash2, Store } from 'lucide-react';
 import { Branch } from '@/types/branch';
 
 const BranchesTable = () => {
-  const { data, isLoading } = useBranches();
+  const t = useTranslations('Branches');
+  
+  // ✅ State للبحث والفلاتر والـ View Mode
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(''); 
+  const [cityFilter, setCityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'card'>('table'); // ✅ View Mode
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
+  const [viewingBranch, setViewingBranch] = useState<Branch | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
+
+  const { data, isLoading } = useBranches(page, 50, searchTerm, 'desc');
   const branches = useMemo(() => Array.isArray(data) ? data : [], [data]);
   
   const deleteMutation = useDeleteBranch();
   const createMutation = useCreateBranch();
   const updateMutation = useUpdateBranch();
 
-  const [globalFilter, setGlobalFilter] = useState('');
-  const [cityFilter, setCityFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  const [viewingBranch, setViewingBranch] = useState<Branch | null>(null);
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [branchToDelete, setBranchToDelete] = useState<string | null>(null);
-
-  // ✅ استخراج المدن الفريدة (تم نقله إلى الأعلى وبعده مباشرة عن الـ state)
   const uniqueCities = useMemo(() => Array.from(new Set(branches.map(b => b.city).filter(Boolean))), [branches]);
 
   const handleDeleteClick = (id: string) => {
@@ -58,23 +63,25 @@ const BranchesTable = () => {
 
   const columns = useMemo<ColumnDef<Branch>[]>(
     () => [
-      { accessorKey: 'name', header: 'اسم الفرع', cell: ({ row }) => (
-          <div className="flex items-center gap-3 justify-end">
-            <span className="text-sm font-medium text-[#1C1C1C]">{row.original.name}</span>
-            <Store className="w-5 h-5 text-[#3E421C] hidden sm:block" />
-          </div>
+      { accessorKey: 'name', header: t('table.name') },
+      { accessorKey: 'city', header: t('table.city') },
+      { accessorKey: 'manager', header: t('table.manager') },
+      { accessorKey: 'productCount', header: t('table.productCount') },
+      { accessorKey: 'sales', header: t('table.sales') },
+      { 
+        accessorKey: 'isActive', 
+        header: t('table.status'),
+        cell: ({ row }) => (
+          <StatusBadge 
+            status={row.original.isActive === false ? 'closed' : 'open'} 
+            label={row.original.isActive ? t('status.open') : t('status.closed')} 
+          />
         ),
       },
-      { accessorKey: 'city', header: 'المدينة', cell: ({ row }) => <span className="text-sm text-[#666666]">{row.original.city}</span> },
-      { accessorKey: 'manager', header: 'المدير', cell: ({ row }) => <span className="text-sm text-[#666666]">{row.original.manager}</span> },
-      { accessorKey: 'productCount', header: 'عدد المنتجات', cell: ({ row }) => <span className="text-sm text-[#1C1C1C]">{row.original.productCount}</span> },
-      { accessorKey: 'sales', header: 'المبيعات', cell: ({ row }) => <span className="text-sm text-[#1C1C1C]">{formatCurrency(row.original.sales || 0)}</span> },
-      { accessorKey: 'isActive', header: 'الحالة', cell: ({ row }) => (
-          <StatusBadge status={row.original.isActive === false ? 'closed' : 'open'} label={row.original.isActive ? 'مفتوح' : 'مغلق'} />
-        ),
-      },
-      { accessorKey: 'lastUpdated', header: 'آخر تحديث', cell: ({ row }) => <span className="text-sm text-[#666666]">{row.original.lastUpdated || '-'}</span> },
-      { id: 'actions', cell: ({ row }) => (
+      { accessorKey: 'lastUpdated', header: t('table.lastUpdated') },
+      { 
+        id: 'actions',
+        cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <button onClick={() => handleDeleteClick(row.original.id)} className="p-1.5 text-[#A1A1A1] hover:text-[#DD404B]">
               <Trash2 className="w-4 h-4" />
@@ -89,31 +96,25 @@ const BranchesTable = () => {
         ),
       },
     ],
-    []
+    [t]
   );
 
-  // ✅ تطبيق الفلاتر
+  // ✅ الفلترة المحلية
   const filteredData = useMemo(() => {
     return branches.filter((branch) => {
-      const matchesGlobal = !globalFilter || 
-        branch.name.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        branch.city.toLowerCase().includes(globalFilter.toLowerCase());
-      
       const matchesCity = !cityFilter || branch.city === cityFilter;
       const matchesStatus = !statusFilter || 
         (statusFilter === 'open' ? branch.isActive : !branch.isActive);
-
-      return matchesGlobal && matchesCity && matchesStatus;
+      return matchesCity && matchesStatus;
     });
-  }, [branches, globalFilter, cityFilter, statusFilter]);
+  }, [branches, cityFilter, statusFilter]);
 
   const table = useReactTable({
     data: filteredData,
     columns,
-    state: { globalFilter },
-    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: { pagination: { pageSize: 10 } },
   });
@@ -134,51 +135,111 @@ const BranchesTable = () => {
 
   return (
     <>
-      {/* فلتر المدينة */}
-      <div className="mb-4 flex gap-4">
-        <div className="w-1/3">
-          <select 
-            value={cityFilter}
-            onChange={(e) => setCityFilter(e.target.value)}
-            className="w-full border border-[#E2E2E2] rounded-lg px-3 py-2 text-sm"
+      {/* ✅ التبديل بين عرض الجدول والبطاقات + الفلاتر */}
+      <div className="mb-4 flex flex-wrap justify-between items-center gap-4">
+        
+        {/* أزرار التبديل */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+              viewMode === 'table' ? 'bg-[#3E421C] text-white' : 'bg-[#F3F3F3] text-[#1C1C1C]'
+            }`}
           >
-            <option value="">كل المدن</option>
-            {uniqueCities.map(city => <option key={city} value={city}>{city}</option>)}
-          </select>
+            جدول
+          </button>
+          <button
+            onClick={() => setViewMode('card')}
+            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+              viewMode === 'card' ? 'bg-[#3E421C] text-white' : 'bg-[#F3F3F3] text-[#1C1C1C]'
+            }`}
+          >
+            بطاقات
+          </button>
         </div>
-        <div className="w-1/3">
-          <select 
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full border border-[#E2E2E2] rounded-lg px-3 py-2 text-sm"
+
+        {/* فلاتر المدينة والحالة */}
+        <div className="flex flex-wrap gap-4">
+          <div className="w-full sm:w-40">
+            <select 
+              value={cityFilter}
+              onChange={(e) => setCityFilter(e.target.value)}
+              className="w-full border border-[#E2E2E2] rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="">كل المدن</option>
+              {uniqueCities.map(city => <option key={city} value={city}>{city}</option>)}
+            </select>
+          </div>
+          <div className="w-full sm:w-40">
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full border border-[#E2E2E2] rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="">كل الحالات</option>
+              <option value="open">مفتوح</option>
+              <option value="closed">مغلق</option>
+            </select>
+          </div>
+
+          {/* ✅ زر إعادة ضبط الفلاتر */}
+          <button
+            onClick={() => {
+              setCityFilter('');
+              setStatusFilter('');
+              setSearchTerm('');
+            }}
+            className="px-4 py-2 text-sm bg-[#F3F3F3] text-[#1C1C1C] rounded-lg hover:bg-[#E2E2E2] transition-colors"
           >
-            <option value="">كل الحالات</option>
-            <option value="open">مفتوح</option>
-            <option value="closed">مغلق</option>
-          </select>
+            إعادة ضبط
+          </button>
         </div>
       </div>
 
+      {/* ✅ حقل البحث */}
       <div className="mb-4">
         <Input 
-          placeholder="بحث باسم الفرع أو المدينة..." 
-          value={globalFilter ?? ''}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder={t('searchPlaceholder')} 
+          value={searchTerm ?? ''}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <DataTable headers={['اسم الفرع', 'المدينة', 'المدير', 'عدد المنتجات', 'المبيعات', 'الحالة', 'آخر تحديث', '']}>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id} className="hover:bg-[#F8F8F2] transition-colors">
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </DataTable>
+      {/* ✅ عرض الجدول أو البطاقات */}
+      {viewMode === 'table' ? (
+        <DataTable headers={[t('table.name'), t('table.city'), t('table.manager'), t('table.productCount'), t('table.sales'), t('table.status'), t('table.lastUpdated'), '']}>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id} className="hover:bg-[#F8F8F2] transition-colors">
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </DataTable>
+      ) : (
+        // ✅ عرض البطاقات
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredData.map((branch) => (
+            <div key={branch.id} className="bg-white p-4 rounded-xl border border-[#F3F3F3] shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-bold text-lg text-[#1C1C1C]">{branch.name}</h3>
+                <StatusBadge status={branch.isActive ? 'open' : 'closed'} label={branch.isActive ? t('status.open') : t('status.closed')} />
+              </div>
+              <p className="text-sm text-[#666666] mb-1"><span className="font-medium">المدينة:</span> {branch.city}</p>
+              <p className="text-sm text-[#666666] mb-1"><span className="font-medium">المدير:</span> {branch.manager}</p>
+              <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-[#F3F3F3]">
+                <button onClick={() => handleDeleteClick(branch.id)} className="p-1.5 text-[#A1A1A1] hover:text-[#DD404B]"><Trash2 className="w-4 h-4" /></button>
+                <button onClick={() => { setEditingBranch(branch); setIsModalOpen(true); }} className="p-1.5 text-[#A1A1A1] hover:text-[#3E421C]"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => setViewingBranch(branch)} className="p-1.5 text-[#A1A1A1] hover:text-[#3E421C]"><Eye className="w-4 h-4" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
+      {/* الترقيم */}
       <div className="flex items-center justify-between mt-6">
         <div className="flex items-center gap-2 text-sm text-[#666666]">
           <span>عرض</span>
@@ -192,28 +253,27 @@ const BranchesTable = () => {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="px-3 py-1 border border-[#E2E2E2] rounded text-sm disabled:opacity-50">
-            السابق
+            {t('buttons.previous')}
           </button>
           <span className="text-sm text-[#666666]">{table.getState().pagination.pageIndex + 1} من {table.getPageCount()}</span>
           <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="px-3 py-1 border border-[#E2E2E2] rounded text-sm disabled:opacity-50">
-            التالي
+            {t('buttons.next')}
           </button>
         </div>
       </div>
 
-      <DeleteConfirmModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={confirmDelete} title="تأكيد الحذف" message="هل أنت متأكد من حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء." />
-
-      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBranch(null); }} title={editingBranch ? 'تعديل الفرع' : 'إضافة فرع جديد'}>
+      {/* المودالات */}
+      <DeleteConfirmModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={confirmDelete} title={t('buttons.delete')} message="هل أنت متأكد من حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء." />
+      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBranch(null); }} title={editingBranch ? t('buttons.edit') : t('addBranch')}>
         <BranchForm initialData={editingBranch} onSave={handleSaveBranch} onCancel={() => { setIsModalOpen(false); setEditingBranch(null); }} />
       </Modal>
-
-      <Modal isOpen={!!viewingBranch} onClose={() => setViewingBranch(null)} title="تفاصيل الفرع">
+      <Modal isOpen={!!viewingBranch} onClose={() => setViewingBranch(null)} title={t('buttons.view')}>
         {viewingBranch && (
           <div className="space-y-3 text-right">
-            <div className="flex justify-between border-b pb-2"><span className="font-medium">الاسم:</span><span>{viewingBranch.name}</span></div>
-            <div className="flex justify-between border-b pb-2"><span className="font-medium">المدينة:</span><span>{viewingBranch.city}</span></div>
-            <div className="flex justify-between border-b pb-2"><span className="font-medium">المدير:</span><span>{viewingBranch.manager}</span></div>
-            <div className="flex justify-between border-b pb-2"><span className="font-medium">الحالة:</span><StatusBadge status={viewingBranch.isActive ? 'open' : 'closed'} label={viewingBranch.isActive ? 'مفتوح' : 'مغلق'} /></div>
+            <div className="flex justify-between border-b pb-2"><span className="font-medium">{t('table.name')}:</span><span>{viewingBranch.name}</span></div>
+            <div className="flex justify-between border-b pb-2"><span className="font-medium">{t('table.city')}:</span><span>{viewingBranch.city}</span></div>
+            <div className="flex justify-between border-b pb-2"><span className="font-medium">{t('table.manager')}:</span><span>{viewingBranch.manager}</span></div>
+            <div className="flex justify-between border-b pb-2"><span className="font-medium">{t('table.status')}:</span><StatusBadge status={viewingBranch.isActive ? 'open' : 'closed'} label={viewingBranch.isActive ? t('status.open') : t('status.closed')} /></div>
             <Button className="w-full mt-4" onClick={() => setViewingBranch(null)}>إغلاق</Button>
           </div>
         )}

@@ -1,13 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Branch } from '@/types/branch';
+import { toast } from 'sonner'; // ✅ استيراد toast
 
-export const useBranches = () => {
+// 1. جلب كل الفروع (limit=1000 لجلب كل الفروع مرة واحدة)
+export const useBranches = (page = 1, limit = 1000, search = '', sortOrder = 'desc', isActive?: boolean) => {
   return useQuery({
-    queryKey: ['branches'],
+    queryKey: ['branches', page, limit, search, sortOrder, isActive],
     queryFn: async () => {
-      const response = await api.get('/branches');
-      console.log("✅ البيانات الخام من السيرفر:", response.data);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        sortOrder,
+      });
+      if (search && search.trim() !== '') {
+        params.append('search', search);
+      }
+      if (isActive !== undefined) {
+        params.append('isActive', isActive.toString());
+      }
+
+      const response = await api.get(`/branches?${params.toString()}`);
       const rawData = response.data?.data || [];
 
       return rawData.map((item: any): Branch => ({
@@ -54,83 +67,46 @@ export const useCreateBranch = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newBranch: any) => {
-      // ✅ إرسال البيانات بالشكل الصحيح الذي يتوقعه السيرفر
       const payload = {
-        name: newBranch.name,
-        nameAr: newBranch.nameAr || '',
-        city: newBranch.city,
-        isActive: newBranch.isActive,
-        openingTime: newBranch.openingTime || '09:00',
-        closingTime: newBranch.closingTime || '23:00',
-        phoneNumber: newBranch.phoneNumber || '',
-        address: {
-          latitude: newBranch.address?.latitude || 0,
-          longitude: newBranch.address?.longitude || 0,
-          country: newBranch.address?.country || 'Saudi Arabia',
-          region: newBranch.address?.region || '',
-          governorate: newBranch.address?.governorate || '',
-          city: newBranch.address?.city || newBranch.city,
-          district: newBranch.address?.district || '',
-          street: newBranch.address?.street || '',
-          buildingNumber: newBranch.address?.buildingNumber || '',
-          floor: newBranch.address?.floor || '',
-          apartment: newBranch.address?.apartment || '',
-          landmark: newBranch.address?.landmark || '',
-          notes: newBranch.address?.notes || '',
-        },
-        fulfillmentMethods: Array.isArray(newBranch.fulfillmentMethods) 
-          ? newBranch.fulfillmentMethods.map((m: string) => ({ fulfillmentMethod: m }))
-          : [],
+        ...newBranch,
+        fulfillmentMethod: Array.isArray(newBranch.fulfillmentMethod) && newBranch.fulfillmentMethod.length > 0
+          ? newBranch.fulfillmentMethod[0]
+          : "PICKUP",
       };
       console.log("📦 إرسال بيانات الإضافة:", payload);
       const { data } = await api.post('/branches', payload);
       return data;
     },
     onSuccess: () => {
+      toast.success('✅ تم إضافة الفرع بنجاح!'); // ✅ رسالة النجاح
       queryClient.invalidateQueries({ queryKey: ['branches'] });
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error('❌ حدث خطأ أثناء إضافة الفرع.');
     },
   });
 };
 
-// 3. تعديل فرع (PATCH)
+// 3. تعديل فرع (PATCH) - تم إزالة fulfillmentMethod
 export const useUpdateBranch = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...rest }: { id: string; [key: string]: any }) => {
-      // ✅ نفس الهيكل الصحيح للتعديل
-      const payload = {
-        name: rest.name,
-        nameAr: rest.nameAr || '',
-        city: rest.city,
-        isActive: rest.isActive,
-        openingTime: rest.openingTime || '09:00',
-        closingTime: rest.closingTime || '23:00',
-        phoneNumber: rest.phoneNumber || '',
-        address: {
-          latitude: rest.address?.latitude || 0,
-          longitude: rest.address?.longitude || 0,
-          country: rest.address?.country || 'Saudi Arabia',
-          region: rest.address?.region || '',
-          governorate: rest.address?.governorate || '',
-          city: rest.address?.city || rest.city,
-          district: rest.address?.district || '',
-          street: rest.address?.street || '',
-          buildingNumber: rest.address?.buildingNumber || '',
-          floor: rest.address?.floor || '',
-          apartment: rest.address?.apartment || '',
-          landmark: rest.address?.landmark || '',
-          notes: rest.address?.notes || '',
-        },
-        fulfillmentMethods: Array.isArray(rest.fulfillmentMethods) 
-          ? rest.fulfillmentMethods.map((m: string) => ({ fulfillmentMethod: m }))
-          : [],
-      };
+      // ✅ إزالة fulfillmentMethod من التعديل لأن الـ API لا يقبله
+      const { fulfillmentMethod, ...payload } = rest;
+      
       console.log("📦 إرسال بيانات التعديل:", payload);
       const { data } = await api.patch(`/branches/${id}`, payload);
       return data;
     },
     onSuccess: () => {
+      toast.success('✅ تم تعديل الفرع بنجاح!'); // ✅ رسالة النجاح
       queryClient.invalidateQueries({ queryKey: ['branches'] });
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error('❌ حدث خطأ أثناء تعديل الفرع.');
     },
   });
 };
@@ -145,7 +121,12 @@ export const useDeleteBranch = () => {
       return id;
     },
     onSuccess: () => {
+      toast.success('✅ تم حذف الفرع بنجاح!'); // ✅ رسالة النجاح
       queryClient.invalidateQueries({ queryKey: ['branches'] });
+    },
+    onError: (error: any) => {
+      console.error(error);
+      toast.error('❌ حدث خطأ أثناء حذف الفرع.');
     },
   });
 };
