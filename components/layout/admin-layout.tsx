@@ -14,10 +14,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // اكتشاف حجم الشاشة
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024); // 1024px هو الـ breakpoint بتاع الـ desktop
+      setIsMobile(window.innerWidth < 1024);
     };
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
@@ -26,26 +25,21 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] flex flex-row-reverse">
-      
-      {/* 1. السايدبار للشاشات الكبيرة (Desktop) */}
       <div className="hidden lg:block fixed right-0 top-0 h-screen w-[240px] bg-white border-l border-[rgba(21,84,42,0.07)] z-50 shrink-0">
         <AdminSidebar />
       </div>
 
-      {/* 2. السايدبار للموبايل (Sheet/Drawer) */}
       <Sheet open={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)}>
         <div className="h-full w-full overflow-y-auto">
-          <AdminSidebar closeMenu={() => setIsMobileMenuOpen(false)} />
+          <AdminSidebar />
         </div>
       </Sheet>
 
-      {/* 3. المحتوى الرئيسي - تم تعديل الـ margin هنا */}
       <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isMobile ? 'mr-0' : 'mr-[240px]'}`}>
         <AdminTopbar 
           onMenuToggle={() => setIsMobileMenuOpen(true)} 
           showMenuButton={isMobile} 
         />
-        
         <main className="flex-1 p-4 md:p-8 w-full max-w-full overflow-x-hidden">
           {children}
         </main>
